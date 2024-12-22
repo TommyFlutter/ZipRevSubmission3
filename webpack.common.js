@@ -1,4 +1,6 @@
+/* eslint-disable linebreak-style */
 /* eslint-disable no-undef */
+const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -14,6 +16,11 @@ module.exports = {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
+  },
+  devServer: {
+    devMiddleware: {
+      writeToDisk: true,
+    },
   },
   module: {
     rules: [
@@ -54,6 +61,7 @@ module.exports = {
     },
   },
   plugins: [
+    new webpack.ProgressPlugin(),
     new CleanWebpackPlugin(),
     new BundleAnalyzerPlugin(),
     new HtmlWebpackPlugin({
@@ -72,9 +80,44 @@ module.exports = {
         },
       ],
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/public/images/'),
+          to: path.resolve(__dirname, 'dist/images/[path][name]-large[ext]'),
+          globOptions: {
+            // CopyWebpackPlugin ignore some folders and files
+            ignore: [
+              '**/android/**',
+              '**/ios/**',
+              '**/windows11/**',
+              'apple-touch-icon.png',
+              'favicon-16x16.png',
+              'favicon-32x32.png',
+              'favicon.ico',
+              'maskable_icon_x192.png',
+            ],
+          },
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/public/images/'),
+          to: path.resolve(__dirname, 'dist/images/[path][name][ext]'),
+          globOptions: {
+            // CopyWebpackPlugin ignore some folders and files
+            ignore: ['**/reviews/**', 'logo.png'],
+          },
+        },
+      ],
+    }),
     new WorkboxWebpackPlugin.InjectManifest({
       swSrc: path.resolve(__dirname, 'src/scripts/sw.js'),
       swDest: './sw.bundle.js',
     }),
   ],
 };
+
+
